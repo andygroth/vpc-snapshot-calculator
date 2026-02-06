@@ -1,0 +1,29 @@
+# IBM Cloud VPC Snapshot Calculator - Terraform Variables Example
+# Copy this file to terraform.tfvars and fill in your values
+
+# IBM Cloud API Key (required)
+# Get your API key from: https://cloud.ibm.com/iam/apikeys
+ibmcloud_api_key = "YOUR_IBM_CLOUD_API_KEY_HERE"
+
+# Region where resources will be created
+region = "us-south"
+
+# Resource group name
+resource_group = "Default"
+
+# Prefix for resource names
+prefix = "snapshot-calc"
+
+# Application name
+app_name = "vpc-snapshot-calculator"
+
+# Instance profile (VM size)
+# Options: cx2-2x4 (2 vCPU, 4GB RAM), cx2-4x8 (4 vCPU, 8GB RAM), etc.
+instance_profile = "cx2-2x4"
+
+# SSH key name (optional - leave empty if you don't have one)
+# If provided, you can SSH into the VM using this key
+ssh_key_name = ""
+
+# Tags for resources
+tags = ["vpc-snapshot-calculator", "terraform", "demo"]
