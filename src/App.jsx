@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import packageJson from '../package.json';
 import { 
   Content, 
   Grid, 
@@ -168,15 +169,24 @@ function App() {
             <Grid>
               <Column lg={16} md={8} sm={4}>
                 <p className="footer-text">
-                  IBM Cloud VPC Snapshot Calculator | 
-                  Built with IBM Carbon Design System | 
-                  <a 
-                    href="https://www.ibm.com/cloud/vpc/pricing" 
-                    target="_blank" 
+                  IBM Cloud VPC Snapshot Calculator v{packageJson.version} |
+                  Built with IBM Carbon Design System |
+                  <a
+                    href="https://www.ibm.com/cloud/vpc/pricing"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="footer-link"
                   >
                     Verify Pricing
+                  </a>
+                  {' | '}
+                  <a
+                    href="https://github.com/andygroth/vpc-snapshot-calculator"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footer-link"
+                  >
+                    GitHub
                   </a>
                 </p>
               </Column>
