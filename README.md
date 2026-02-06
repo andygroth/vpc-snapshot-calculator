@@ -235,9 +235,253 @@ vpc-snapshot-calculator/
 
 ## Deployment
 
+### Ubuntu Server Deployment
+
+Complete guide for deploying on Ubuntu Server (20.04 LTS or higher).
+
+#### Prerequisites
+
+Update your system:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+#### Step 1: Install Node.js and npm
+
+Install Node.js 18.x (LTS):
+```bash
+# Install curl if not present
+sudo apt install -y curl
+
+# Add NodeSource repository
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+
+# Install Node.js and npm
+sudo apt install -y nodejs
+
+# Verify installation
+node --version  # Should show v18.x.x
+npm --version   # Should show 9.x.x or higher
+```
+
+#### Step 2: Install Git (if not already installed)
+
+```bash
+sudo apt install -y git
+```
+
+#### Step 3: Clone the Repository
+
+```bash
+# Navigate to your desired directory
+cd /var/www  # or any directory you prefer
+
+# Clone the repository
+git clone https://github.com/andygroth/vpc-snapshot-calculator.git
+
+# Navigate to project directory
+cd vpc-snapshot-calculator
+```
+
+#### Step 4: Install Dependencies
+
+```bash
+npm install
+```
+
+This will install all required packages (~223 MB).
+
+#### Step 5: Build the Application
+
+```bash
+npm run build
+```
+
+This creates an optimized production build in the `dist/` directory.
+
+#### Step 6: Install and Configure Nginx
+
+Install Nginx web server:
+```bash
+sudo apt install -y nginx
+```
+
+Create Nginx configuration:
+```bash
+sudo nano /etc/nginx/sites-available/vpc-calculator
+```
+
+Add the following configuration:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;  # Replace with your domain or server IP
+
+    root /var/www/vpc-snapshot-calculator/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Enable gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+Enable the site:
+```bash
+# Create symbolic link
+sudo ln -s /etc/nginx/sites-available/vpc-calculator /etc/nginx/sites-enabled/
+
+# Test Nginx configuration
+sudo nginx -t
+
+# Restart Nginx
+sudo systemctl restart nginx
+```
+
+#### Step 7: Configure Firewall
+
+```bash
+# Allow Nginx through firewall
+sudo ufw allow 'Nginx Full'
+
+# Check firewall status
+sudo ufw status
+```
+
+#### Step 8: Access the Application
+
+Open your browser and navigate to:
+- `http://your-server-ip`
+- or `http://your-domain.com`
+
+#### Optional: Enable HTTPS with Let's Encrypt
+
+Install Certbot:
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+```
+
+Obtain SSL certificate:
+```bash
+sudo certbot --nginx -d your-domain.com
+```
+
+Follow the prompts to configure HTTPS. Certbot will automatically:
+- Obtain a certificate
+- Configure Nginx for HTTPS
+- Set up automatic renewal
+
+#### Optional: Set Up as a Service (Development Mode)
+
+If you want to run the development server as a service:
+
+Create a systemd service file:
+```bash
+sudo nano /etc/systemd/system/vpc-calculator.service
+```
+
+Add the following:
+```ini
+[Unit]
+Description=VPC Snapshot Calculator
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/vpc-snapshot-calculator
+ExecStart=/usr/bin/npm run dev -- --host 0.0.0.0
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable vpc-calculator
+sudo systemctl start vpc-calculator
+sudo systemctl status vpc-calculator
+```
+
+#### Updating the Application
+
+To update to the latest version:
+
+```bash
+cd /var/www/vpc-snapshot-calculator
+
+# Pull latest changes
+git pull origin main
+
+# Install any new dependencies
+npm install
+
+# Rebuild
+npm run build
+
+# Restart Nginx (if using production build)
+sudo systemctl restart nginx
+
+# Or restart service (if using development mode)
+sudo systemctl restart vpc-calculator
+```
+
+#### Troubleshooting
+
+**Port 3000 already in use:**
+```bash
+# Find process using port 3000
+sudo lsof -i :3000
+
+# Kill the process
+sudo kill -9 <PID>
+```
+
+**Permission issues:**
+```bash
+# Set correct ownership
+sudo chown -R www-data:www-data /var/www/vpc-snapshot-calculator
+
+# Set correct permissions
+sudo chmod -R 755 /var/www/vpc-snapshot-calculator
+```
+
+**Nginx not starting:**
+```bash
+# Check Nginx error logs
+sudo tail -f /var/log/nginx/error.log
+
+# Check Nginx configuration
+sudo nginx -t
+```
+
+**Application not loading:**
+```bash
+# Check if build directory exists
+ls -la /var/www/vpc-snapshot-calculator/dist
+
+# Rebuild if necessary
+cd /var/www/vpc-snapshot-calculator
+npm run build
+```
+
 ### Static Hosting Options
 
-This application can be deployed to any static hosting service:
+This application can also be deployed to any static hosting service:
 
 #### GitHub Pages
 
