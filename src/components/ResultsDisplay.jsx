@@ -79,7 +79,7 @@ function ResultsDisplay({ results, pricing }) {
           </div>
 
           <div className="summary-card">
-            <div className="summary-label">Total Storage (Snapshots + Base)</div>
+            <div className="summary-label">Snapshot Storage</div>
             <div className="summary-value">
               {formatStorage(results.totalStorageGB)}
             </div>
