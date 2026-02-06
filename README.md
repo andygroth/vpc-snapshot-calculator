@@ -419,7 +419,41 @@ sudo systemctl status vpc-calculator
 
 #### Updating the Application
 
-To update to the latest version:
+##### Automated Update (Recommended)
+
+Use the included update script for automated updates:
+
+```bash
+cd /var/www/vpc-snapshot-calculator
+
+# Update production build (default)
+./update-server.sh
+
+# Or update development service
+./update-server.sh --dev
+
+# Update without restarting services
+./update-server.sh --no-restart
+```
+
+The script automatically:
+- ✅ Creates a backup of the current build
+- ✅ Stashes any local changes
+- ✅ Pulls latest code from GitHub
+- ✅ Installs/updates dependencies
+- ✅ Rebuilds the application
+- ✅ Restarts Nginx (production) or service (dev)
+- ✅ Provides detailed status output
+- ✅ Rolls back on build failure
+
+**Script Options:**
+- `--production` - Update production build (default)
+- `--dev` - Update development service
+- `--no-restart` - Skip service restart
+
+##### Manual Update
+
+If you prefer manual updates:
 
 ```bash
 cd /var/www/vpc-snapshot-calculator
