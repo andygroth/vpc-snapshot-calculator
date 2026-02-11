@@ -36,7 +36,34 @@ Deploy the VPC Snapshot Calculator to IBM Code Engine with Terraform.
 
 ## Quick Start
 
-### 1. Install IBM Cloud CLI Plugins
+### Option 1: Automated Deployment (Recommended)
+
+The easiest way to deploy is using the automated deployment script:
+
+```bash
+cd terraform/code-engine
+
+# Copy example variables
+cp terraform.tfvars.example terraform.tfvars
+
+# Edit terraform.tfvars with your values
+nano terraform.tfvars
+
+# Run the deployment script
+./deploy.sh
+```
+
+The script will:
+1. Login to IBM Cloud
+2. Build and push Docker images to Container Registry
+3. Deploy infrastructure with Terraform
+4. Output the application URLs
+
+### Option 2: Manual Deployment
+
+If you prefer manual control:
+
+#### 1. Install IBM Cloud CLI Plugins
 
 ```bash
 # Install Container Registry plugin
@@ -44,83 +71,48 @@ ibmcloud plugin install container-registry
 
 # Install Code Engine plugin
 ibmcloud plugin install code-engine
-
-# Install Kubernetes Service plugin (for kubectl)
-ibmcloud plugin install kubernetes-service
 ```
 
-### 2. Login to IBM Cloud
+#### 2. Login to IBM Cloud
 
 ```bash
-# Login
-ibmcloud login --apikey YOUR_API_KEY
+# Login (replace with your region, e.g., eu-de for Frankfurt)
+ibmcloud login --apikey YOUR_API_KEY -r eu-de
 
 # Target your resource group
 ibmcloud target -g Default
 
 # Login to Container Registry
-ibmcloud cr login
+ibmcloud cr login --client docker
 ```
 
-### 3. Build and Push Docker Images
+#### 3. Build and Push Docker Images
 
-#### Build API Image
+**Build API Image:**
 
 ```bash
 cd api
 
-# Build the image
-docker build -t us.icr.io/vpc-calculator/vpc-calculator-api:latest .
+# Build the image (adjust region: us, eu, de, etc.)
+docker build -t de.icr.io/vpc-calculator/vpc-calculator-api:latest .
 
 # Push to IBM Container Registry
-docker push us.icr.io/vpc-calculator/vpc-calculator-api:latest
+docker push de.icr.io/vpc-calculator/vpc-calculator-api:latest
 ```
 
-#### Build Frontend Image
-
-First, create a Dockerfile for the frontend:
-
-```dockerfile
-# Dockerfile (in project root)
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-Create nginx.conf:
-
-```nginx
-server {
-    listen 8080;
-    root /usr/share/nginx/html;
-    index index.html;
-    
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-Build and push:
+**Build Frontend Image:**
 
 ```bash
+cd ..  # Back to project root
+
 # Build frontend image
-docker build -t us.icr.io/vpc-calculator/vpc-calculator-frontend:latest .
+docker build -t de.icr.io/vpc-calculator/vpc-calculator-frontend:latest .
 
 # Push to IBM Container Registry
-docker push us.icr.io/vpc-calculator/vpc-calculator-frontend:latest
+docker push de.icr.io/vpc-calculator/vpc-calculator-frontend:latest
 ```
 
-### 4. Configure Terraform
+#### 4. Configure Terraform
 
 ```bash
 cd terraform/code-engine
@@ -136,10 +128,11 @@ Required variables:
 ```hcl
 ibmcloud_api_key = "your-terraform-api-key"
 pricing_api_key  = "your-pricing-api-key"
-region           = "us-south"
+region           = "eu-de"  # Frankfurt
+registry_region  = "de"     # Frankfurt registry
 ```
 
-### 5. Deploy with Terraform
+#### 5. Deploy with Terraform
 
 ```bash
 # Initialize Terraform
