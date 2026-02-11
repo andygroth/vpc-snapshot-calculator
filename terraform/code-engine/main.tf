@@ -92,9 +92,10 @@ resource "ibm_code_engine_app" "api" {
 
   # Secret reference for API key
   run_env_variables {
-    type      = "secret_key_reference"
-    name      = "IBM_CLOUD_API_KEY"
-    reference = "${ibm_code_engine_secret.api_key.name}.IBM_CLOUD_API_KEY"
+    type  = "secret_key_reference"
+    name  = "IBM_CLOUD_API_KEY"
+    key   = "IBM_CLOUD_API_KEY"
+    reference = ibm_code_engine_secret.api_key.name
   }
 
   # Health check
