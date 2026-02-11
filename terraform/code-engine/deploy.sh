@@ -36,12 +36,13 @@ echo "  API Image Tag: $API_IMAGE_TAG"
 echo "  Frontend Image Tag: $FRONTEND_IMAGE_TAG"
 echo ""
 
-# Step 1: Login to IBM Cloud
-echo -e "${GREEN}Step 1: Logging in to IBM Cloud...${NC}"
-if ! ibmcloud login --apikey $(grep 'ibmcloud_api_key' terraform.tfvars | cut -d'"' -f2) -r $REGION; then
-    echo -e "${RED}Failed to login to IBM Cloud${NC}"
+# Step 1: Verify IBM Cloud login
+echo -e "${GREEN}Step 1: Verifying IBM Cloud login...${NC}"
+if ! ibmcloud target; then
+    echo -e "${RED}Not logged in to IBM Cloud. Please run: ibmcloud login${NC}"
     exit 1
 fi
+echo -e "${GREEN}✓ Already logged in to IBM Cloud${NC}"
 
 # Step 2: Login to Container Registry
 echo -e "${GREEN}Step 2: Logging in to Container Registry...${NC}"
@@ -49,6 +50,7 @@ if ! ibmcloud cr login --client docker; then
     echo -e "${RED}Failed to login to Container Registry${NC}"
     exit 1
 fi
+echo -e "${GREEN}✓ Logged in to Container Registry${NC}"
 
 # Step 3: Build and push API image
 echo -e "${GREEN}Step 3: Building and pushing API image...${NC}"
