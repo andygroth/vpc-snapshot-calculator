@@ -19,8 +19,12 @@ resource_group_name = "Default"
 project_name = "vpc-snapshot-calculator"
 
 # Container Registry
+# IMPORTANT: registry_region must match where you pushed your images
+# For Frankfurt (eu-de), use "de"
+# For US South (us-south), use "us"
+# For UK (eu-gb), use "uk"
 registry_namespace = "vpc-calculator"
-registry_region    = "us"
+registry_region    = "de"  # Change to match your region: "us", "de", "uk", etc.
 
 # API Configuration
 api_image_tag           = "latest"
