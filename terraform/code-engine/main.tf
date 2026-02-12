@@ -66,12 +66,8 @@ resource "ibm_code_engine_app" "api" {
   scale_concurrency_target = var.api_concurrency_target
 
   # Environment variables
-  run_env_variables {
-    type  = "literal"
-    name  = "PORT"
-    value = "3001"
-  }
-
+  # Note: PORT is reserved by Code Engine and set automatically via image_port
+  
   run_env_variables {
     type  = "literal"
     name  = "NODE_ENV"
