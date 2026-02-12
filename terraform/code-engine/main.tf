@@ -30,6 +30,10 @@ data "ibm_resource_group" "group" {
 resource "ibm_code_engine_project" "vpc_calculator" {
   name              = var.project_name
   resource_group_id = data.ibm_resource_group.group.id
+  
+  lifecycle {
+    prevent_destroy = false
+  }
 }
 
 # Container Registry Namespace (reference existing namespace)
