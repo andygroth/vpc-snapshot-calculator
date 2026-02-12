@@ -32,10 +32,11 @@ resource "ibm_code_engine_project" "vpc_calculator" {
   resource_group_id = data.ibm_resource_group.group.id
 }
 
-# Container Registry Namespace (for API image)
-resource "ibm_cr_namespace" "vpc_calculator" {
-  name              = var.registry_namespace
-  resource_group_id = data.ibm_resource_group.group.id
+# Container Registry Namespace (reference existing namespace)
+# Note: Namespace must be created manually before running Terraform
+# This prevents Terraform from deleting the namespace (and images) on destroy
+data "ibm_cr_namespace" "vpc_calculator" {
+  name = var.registry_namespace
 }
 
 # Secret for Container Registry access

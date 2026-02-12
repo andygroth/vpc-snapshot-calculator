@@ -44,13 +44,24 @@ if ! ibmcloud target; then
 fi
 echo -e "${GREEN}✓ Already logged in to IBM Cloud${NC}"
 
-# Step 2: Login to Container Registry
-echo -e "${GREEN}Step 2: Logging in to Container Registry...${NC}"
+# Step 2: Ensure Container Registry namespace exists
+echo -e "${GREEN}Step 2: Checking Container Registry namespace...${NC}"
 if ! ibmcloud cr login --client docker; then
     echo -e "${RED}Failed to login to Container Registry${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Logged in to Container Registry${NC}"
+
+# Check if namespace exists, create if it doesn't
+if ! ibmcloud cr namespace-list | grep -q "^${REGISTRY_NAMESPACE}$"; then
+    echo "Creating namespace: $REGISTRY_NAMESPACE"
+    if ! ibmcloud cr namespace-add $REGISTRY_NAMESPACE; then
+        echo -e "${RED}Failed to create namespace${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Namespace created${NC}"
+else
+    echo -e "${GREEN}✓ Namespace already exists${NC}"
+fi
 
 # Step 3: Build and push API image
 echo -e "${GREEN}Step 3: Building and pushing API image...${NC}"
