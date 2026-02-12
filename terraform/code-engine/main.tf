@@ -38,6 +38,20 @@ resource "ibm_cr_namespace" "vpc_calculator" {
   resource_group_id = data.ibm_resource_group.group.id
 }
 
+# Secret for Container Registry access
+resource "ibm_code_engine_secret" "registry_access" {
+  project_id = ibm_code_engine_project.vpc_calculator.project_id
+  name       = "registry-access"
+  format     = "registry"
+
+  data = {
+    username = "iamapikey"
+    password = var.ibmcloud_api_key
+    server   = "${var.registry_region}.icr.io"
+    email    = "noreply@ibm.com"
+  }
+}
+
 # Secret for IBM Cloud API Key (used by backend)
 resource "ibm_code_engine_secret" "api_key" {
   project_id = ibm_code_engine_project.vpc_calculator.project_id
@@ -56,6 +70,7 @@ resource "ibm_code_engine_app" "api" {
 
   image_reference = "${var.registry_region}.icr.io/${ibm_cr_namespace.vpc_calculator.name}/vpc-calculator-api:${var.api_image_tag}"
   image_port      = 3001
+  image_secret    = ibm_code_engine_secret.registry_access.name
 
   # Scaling configuration
   scale_min_instances     = var.api_min_instances
@@ -105,6 +120,7 @@ resource "ibm_code_engine_app" "frontend" {
 
   image_reference = "${var.registry_region}.icr.io/${ibm_cr_namespace.vpc_calculator.name}/vpc-calculator-frontend:${var.frontend_image_tag}"
   image_port      = 8080
+  image_secret    = ibm_code_engine_secret.registry_access.name
 
   # Scaling configuration
   scale_min_instances     = var.frontend_min_instances
