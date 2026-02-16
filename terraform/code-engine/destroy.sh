@@ -34,13 +34,20 @@ if [ "$confirm" != "yes" ]; then
 fi
 
 echo ""
-echo -e "${GREEN}Step 1: Running Terraform destroy...${NC}"
+echo -e "${GREEN}Step 1: Removing prevent_destroy from namespace...${NC}"
+# Temporarily allow namespace destruction for clean terraform destroy
+sed -i.bak 's/prevent_destroy = true/prevent_destroy = false/' main.tf
+
+echo -e "${GREEN}Step 2: Running Terraform destroy...${NC}"
 if ! terraform destroy -auto-approve; then
     echo -e "${YELLOW}Terraform destroy had issues. Attempting force cleanup...${NC}"
 fi
 
+# Restore prevent_destroy
+mv main.tf.bak main.tf 2>/dev/null || true
+
 echo ""
-echo -e "${GREEN}Step 2: Force deleting Code Engine project via CLI...${NC}"
+echo -e "${GREEN}Step 3: Force deleting Code Engine project via CLI...${NC}"
 
 # Select and delete the project
 if ibmcloud ce project select --name $PROJECT_NAME 2>/dev/null; then
