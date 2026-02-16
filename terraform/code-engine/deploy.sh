@@ -77,11 +77,12 @@ else
 fi
 
 # Step 3: Build and push API image
-echo -e "${GREEN}Step 3: Building and pushing API image...${NC}"
+echo -e "${GREEN}Step 3: Building and pushing API image (AMD64 for Code Engine)...${NC}"
 cd ../../api
 API_IMAGE="${REGISTRY_REGION}.icr.io/${REGISTRY_NAMESPACE}/vpc-calculator-api:${API_IMAGE_TAG}"
 echo "Building: $API_IMAGE"
-if ! $CONTAINER_CMD build -t $API_IMAGE .; then
+# Build for AMD64 (x86_64) architecture required by Code Engine
+if ! $CONTAINER_CMD build --platform linux/amd64 -t $API_IMAGE .; then
     echo -e "${RED}Failed to build API image${NC}"
     exit 1
 fi
@@ -92,11 +93,12 @@ fi
 echo -e "${GREEN}✓ API image pushed successfully${NC}"
 
 # Step 4: Build and push frontend image
-echo -e "${GREEN}Step 4: Building and pushing frontend image...${NC}"
+echo -e "${GREEN}Step 4: Building and pushing frontend image (AMD64 for Code Engine)...${NC}"
 cd ..
 FRONTEND_IMAGE="${REGISTRY_REGION}.icr.io/${REGISTRY_NAMESPACE}/vpc-calculator-frontend:${FRONTEND_IMAGE_TAG}"
 echo "Building: $FRONTEND_IMAGE"
-if ! $CONTAINER_CMD build -t $FRONTEND_IMAGE .; then
+# Build for AMD64 (x86_64) architecture required by Code Engine
+if ! $CONTAINER_CMD build --platform linux/amd64 -t $FRONTEND_IMAGE .; then
     echo -e "${RED}Failed to build frontend image${NC}"
     exit 1
 fi
