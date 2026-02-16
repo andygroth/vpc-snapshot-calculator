@@ -14,6 +14,19 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}=== IBM Code Engine Deployment ===${NC}"
 
+# Detect container runtime (Docker or Podman)
+if command -v podman &> /dev/null; then
+    CONTAINER_CMD="podman"
+    echo -e "${YELLOW}Using Podman${NC}"
+elif command -v docker &> /dev/null; then
+    CONTAINER_CMD="docker"
+    echo -e "${YELLOW}Using Docker${NC}"
+else
+    echo -e "${RED}Error: Neither Docker nor Podman found!${NC}"
+    echo "Please install Docker or Podman to build container images"
+    exit 1
+fi
+
 # Check if terraform.tfvars exists
 if [ ! -f "terraform.tfvars" ]; then
     echo -e "${RED}Error: terraform.tfvars not found!${NC}"
@@ -46,7 +59,7 @@ echo -e "${GREEN}✓ Already logged in to IBM Cloud${NC}"
 
 # Step 2: Ensure Container Registry namespace exists
 echo -e "${GREEN}Step 2: Checking Container Registry namespace...${NC}"
-if ! ibmcloud cr login --client docker; then
+if ! ibmcloud cr login --client $CONTAINER_CMD; then
     echo -e "${RED}Failed to login to Container Registry${NC}"
     exit 1
 fi
@@ -68,11 +81,11 @@ echo -e "${GREEN}Step 3: Building and pushing API image...${NC}"
 cd ../../api
 API_IMAGE="${REGISTRY_REGION}.icr.io/${REGISTRY_NAMESPACE}/vpc-calculator-api:${API_IMAGE_TAG}"
 echo "Building: $API_IMAGE"
-if ! docker build -t $API_IMAGE .; then
+if ! $CONTAINER_CMD build -t $API_IMAGE .; then
     echo -e "${RED}Failed to build API image${NC}"
     exit 1
 fi
-if ! docker push $API_IMAGE; then
+if ! $CONTAINER_CMD push $API_IMAGE; then
     echo -e "${RED}Failed to push API image${NC}"
     exit 1
 fi
@@ -83,11 +96,11 @@ echo -e "${GREEN}Step 4: Building and pushing frontend image...${NC}"
 cd ..
 FRONTEND_IMAGE="${REGISTRY_REGION}.icr.io/${REGISTRY_NAMESPACE}/vpc-calculator-frontend:${FRONTEND_IMAGE_TAG}"
 echo "Building: $FRONTEND_IMAGE"
-if ! docker build -t $FRONTEND_IMAGE .; then
+if ! $CONTAINER_CMD build -t $FRONTEND_IMAGE .; then
     echo -e "${RED}Failed to build frontend image${NC}"
     exit 1
 fi
-if ! docker push $FRONTEND_IMAGE; then
+if ! $CONTAINER_CMD push $FRONTEND_IMAGE; then
     echo -e "${RED}Failed to push frontend image${NC}"
     exit 1
 fi
