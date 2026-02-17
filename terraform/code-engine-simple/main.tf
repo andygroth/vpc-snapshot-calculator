@@ -29,6 +29,20 @@ resource "ibm_code_engine_project" "vpc_calculator" {
   resource_group_id = data.ibm_resource_group.group.id
 }
 
+# Secret for Container Registry access (for builds)
+resource "ibm_code_engine_secret" "registry" {
+  project_id = ibm_code_engine_project.vpc_calculator.project_id
+  name       = "registry-secret"
+  format     = "registry"
+
+  data = {
+    username = "iamapikey"
+    password = var.ibmcloud_api_key
+    server   = "private.${var.region}.icr.io"
+    email    = "noreply@ibm.com"
+  }
+}
+
 # Secret for IBM Cloud API Key (used by backend API)
 resource "ibm_code_engine_secret" "api_key" {
   project_id = ibm_code_engine_project.vpc_calculator.project_id
@@ -45,7 +59,7 @@ resource "ibm_code_engine_build" "api" {
   project_id    = ibm_code_engine_project.vpc_calculator.project_id
   name          = "${var.project_name}-api-build"
   output_image  = "private.${var.region}.icr.io/${var.project_name}/api"
-  output_secret = "ce-auto-icr-private-${var.region}"
+  output_secret = ibm_code_engine_secret.registry.name
   source_url    = var.github_repo_url
   source_revision = var.github_branch
   source_context_dir = "api"
@@ -59,7 +73,7 @@ resource "ibm_code_engine_build" "frontend" {
   project_id    = ibm_code_engine_project.vpc_calculator.project_id
   name          = "${var.project_name}-frontend-build"
   output_image  = "private.${var.region}.icr.io/${var.project_name}/frontend"
-  output_secret = "ce-auto-icr-private-${var.region}"
+  output_secret = ibm_code_engine_secret.registry.name
   source_url    = var.github_repo_url
   source_revision = var.github_branch
   source_context_dir = "."
