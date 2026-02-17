@@ -1,0 +1,35 @@
+# IBM Cloud Configuration
+# Copy this file to terraform.tfvars and fill in your values
+
+# IBM Cloud API key for Terraform
+# Get from: https://cloud.ibm.com/iam/apikeys
+ibmcloud_api_key = "your-ibmcloud-api-key-here"
+
+# IBM Cloud API key for pricing API (can be same as above)
+pricing_api_key = "your-pricing-api-key-here"
+
+# IBM Cloud region for Code Engine
+# Options: us-south, us-east, eu-gb, eu-de, jp-tok, jp-osa, au-syd, ca-tor, br-sao
+region = "eu-de"
+
+# Resource group name
+resource_group_name = "andygroth-rg"
+
+# Project Configuration
+project_name = "vpc-snapshot-calculator"
+
+# GitHub Configuration
+github_repo_url = "https://github.com/andygroth/vpc-snapshot-calculator"
+github_branch   = "main"
+
+# API Configuration
+api_min_instances  = 0
+api_max_instances  = 10
+api_cpu_limit      = "0.5"
+api_memory_limit   = "1G"
+cache_ttl          = "86400"
+cors_origin        = "" # Empty for wildcard, or set to your frontend URL
+
+# Frontend Configuration
+frontend_min_instances = 0
+frontend_max_instances = 10
